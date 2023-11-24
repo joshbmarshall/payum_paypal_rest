@@ -5,6 +5,7 @@ use Cognito\PayumPayPalRest\Action\ConvertPaymentAction;
 use Cognito\PayumPayPalRest\Action\CaptureAction;
 use Cognito\PayumPayPalRest\Action\ObtainNonceAction;
 use Cognito\PayumPayPalRest\Action\StatusAction;
+use Cognito\PayumPayPalRest\Action\SetShippingTrackingAction;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\GatewayFactory;
 
@@ -28,6 +29,9 @@ class PayPalRestGatewayFactory extends GatewayFactory
             'payum.action.convert_payment' => new ConvertPaymentAction(),
             'payum.action.obtain_nonce' => function (ArrayObject $config) {
                 return new ObtainNonceAction($config['payum.template.obtain_nonce']);
+            },
+            'payum.action.set_shipping_tracking' => function (ArrayObject $config) {
+                return new SetShippingTrackingAction($config);
             },
         ]);
 

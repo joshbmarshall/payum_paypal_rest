@@ -88,6 +88,21 @@ if ($status->isNew() || $status->isCaptured() || $status->isAuthorized()) {
 }
 ```
 
+### Set Shipping Tracking for a payment
+
+```php
+<?php
+$gateway = $payum->getGateway('paypal_rest');
+$gateway->execute($status = new \Cognito\PayumPayPalRest\Action\SetShippingTrackingAction([
+    'transaction_id'  => '8UG60269FS070471K',
+    'tracking_number' => '443844607830',
+    'status'          => 'SHIPPED',
+    'carrier'         => 'FEDEX',
+]));
+
+$success = $status['errors']
+```
+
 ## License
 
 Payum PayPal Rest is released under the [MIT License](LICENSE).
