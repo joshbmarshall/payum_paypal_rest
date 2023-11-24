@@ -1,0 +1,35 @@
+{
+    "name": "cognito/payum_paypal_rest",
+    "type": "library",
+    "description": "The Payum PayPal REST payment module",
+    "keywords": ["payment"],
+    "homepage": "https://payum.forma-pro.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Josh Marshall",
+            "email": "josh@jmarshall.com.au"
+        },
+        {
+            "name": "Kotlyar Maksim",
+            "email": "kotlyar.maksim@gmail.com"
+        },
+        {
+            "name":     "Payum project",
+            "homepage": "https://payum.forma-pro.com/"
+        },
+        {
+            "name":     "Community contributions",
+            "homepage": "https://github.com/joshbmarshall/payum_paypal_rest/contributors"
+        }
+    ],
+    "require": {
+        "payum/core": "^1.5"
+    },
+    "config": {
+        "bin-dir": "bin"
+    },
+    "autoload": {
+        "psr-4": { "Cognito\\PayumPayPalRest\\": "src/" }
+    }
+}

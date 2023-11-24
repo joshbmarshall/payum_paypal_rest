@@ -25,8 +25,9 @@ $payum = (new PayumBuilder)
 
     ->addGateway('paypal_rest', [
         'factory' => 'paypal_rest',
-        'publishable_key' => 'Your Public Key',
-        'secret_key' => 'Your Private Key',
+        // Get client id and secret from https://developer.paypal.com/api/rest/
+        'client_id' => 'username',
+        'client_secret' => 'password',
         'img_url' => 'https://path/to/logo/image.jpg',
         'img_2_url' => 'https://path/to/logo/pay_by_image.jpg',
     ])
