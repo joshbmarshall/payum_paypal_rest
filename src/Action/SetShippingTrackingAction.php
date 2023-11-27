@@ -32,6 +32,20 @@ class SetShippingTrackingAction implements ActionInterface, ApiAwareInterface
     }
 
     /**
+     * Call this after execution to see if any error
+     */
+    public function hasError(): bool {
+        return count($this->getErrors()) > 0;
+    }
+
+    /**
+     * Call this after execution to get the error list
+     */
+    public function getErrors(): array {
+        return $this->model['errors'] ?? [];
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function execute($request)
