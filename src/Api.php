@@ -55,6 +55,11 @@ class Api
         return $this->doRequest('/v1/shipping/trackers-batch', $request);
     }
 
+    public function captureOrder(string $order_id)
+    {
+        return $this->doRequest('/v2/checkout/orders/' . $order_id . '/capture');
+    }
+
     public function placeOrder(array $fields)
     {
         // TODO
@@ -62,9 +67,9 @@ class Api
             "intent": "CAPTURE",
             "purchase_units": [
               {
-                "reference_id": "PU1",
+                "reference_id": "'.uniqid('R').'",
                 "description": "Camera Shop",
-                "invoice_id": "INV-CameraShop-1700811226577",
+                "invoice_id": "INV-CameraShop-'.uniqid('I').'",
                 "custom_id": "CUST-CameraShop",
                 "amount": {
                   "currency_code": "USD",
@@ -148,24 +153,25 @@ class Api
      *
      * @return array
      */
-    protected function doRequest(string $url, array $fields)
+    protected function doRequest(string $url, array $fields = [], string $method = 'POST')
     {
-        $method = 'POST';
         $headers = [
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . $this->getAuthorizationBearer(),
         ];
 
-        $request = $this->messageFactory->createRequest($method, $this->getApiEndpoint() . $url, $headers, json_encode($fields));
+        $request = $this->messageFactory->createRequest($method, $this->getApiEndpoint() . $url, $headers, $fields ? json_encode($fields) : null);
 
         $response = $this->client->send($request);
 
+        $decoded = json_decode($response->getBody()->getContents(), true);
+        ray($decoded);
+        /*
         if (false == ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300))
         {
             throw HttpException::factory($request, $response);
         }
-
-        $decoded = json_decode($response->getBody()->getContents(), true);
+        */
 
         return $decoded;
     }

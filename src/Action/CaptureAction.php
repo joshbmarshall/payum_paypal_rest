@@ -7,11 +7,14 @@ use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\RequestNotSupportedException;
 use Payum\Core\GatewayAwareInterface;
 use Payum\Core\GatewayAwareTrait;
+use Payum\Core\ApiAwareTrait;
 use Payum\Core\Request\Capture;
 use Cognito\PayumPayPalRest\Request\Api\ObtainNonce;
+use Cognito\PayumPayPalRest\Api;
 
-class CaptureAction implements ActionInterface, GatewayAwareInterface {
+class CaptureAction implements ActionInterface, GatewayAwareInterface, \Payum\Core\ApiAwareInterface {
     use GatewayAwareTrait;
+    use ApiAwareTrait;
 
     private $config;
 
@@ -20,6 +23,7 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface {
      */
     public function __construct(ArrayObject $config) {
         $this->config = $config;
+        $this->apiClass = Api::class;
     }
 
     /**
@@ -35,11 +39,9 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface {
             return;
         }
 
-        /*
-        \Stripe\Stripe::setApiKey($this->config['secret_key']);
-        $model['publishable_key'] = $this->config['publishable_key'];
         $model['img_url'] = $this->config['img_url'] ?? '';
         $model['img_2_url'] = $this->config['img_2_url'] ?? '';
+        $model['client_id'] = $this->config['client_id'] ?? '';
 
         $obtainNonce = new ObtainNonce($request->getModel());
         $obtainNonce->setModel($model);
@@ -47,26 +49,31 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface {
         $this->gateway->execute($obtainNonce);
 
         if (!$model->offsetExists('status')) {
-            $stripe = new \Stripe\StripeClient($this->config['secret_key']);
-            $paymentIntent = $stripe->paymentIntents->retrieve($model['nonce'], []);
-            if ($paymentIntent->status == \Stripe\PaymentIntent::STATUS_SUCCEEDED) {
-                $model['status'] = 'success';
-            } else {
-                // Report error
+            // Check if user cancelled
+            if ($model['nonce'] == 'cancel') {
                 $model['status'] = 'failed';
-                $model['error'] = 'failed';
+                $model['error'] = 'Cancelled';
+                return;
             }
-            foreach ($paymentIntent->charges ?? [] as $charge) {
-                $model['transactionReference'] = $charge->id;
-                $model['result'] = $charge;
-            }
-            if ($paymentIntent->latest_charge ?? false) {
-                $model['transactionReference'] = $paymentIntent->latest_charge;
-                $charge = $stripe->charges->retrieve($paymentIntent->latest_charge);
-                $model['stripe_charge_info'] = $charge;
+
+            // Ask PayPal to capture funds
+            $captureResult = $this->api->captureOrder($model['payPalOrderDetails']['id']);
+            $model['result'] = $captureResult;
+
+            if ($captureResult['status'] == 'COMPLETED') {
+                // Capture successful
+                $model['status'] = 'success';
+                foreach ($captureResult['purchase_units'] as $purchase_unit) {
+                    foreach ($purchase_unit['payments']['captures'] as $capture) {
+                        $model['transactionReference'] = $capture['id'];
+                        $model['PAYMENTINFO_0_FEEAMT'] = $capture['seller_receivable_breakdown']['paypal_fee']['value'];
+                    }
+                }
+            } else {
+                $model['status'] = 'failed';
+                $model['error'] = $captureResult;
             }
         }
-        */
     }
 
     /**

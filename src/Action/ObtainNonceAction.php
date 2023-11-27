@@ -12,9 +12,11 @@ use Payum\Core\GatewayAwareTrait;
 use Payum\Core\Reply\HttpResponse;
 use Payum\Core\Request\GetHttpRequest;
 use Payum\Core\Request\RenderTemplate;
+use Cognito\PayumPayPalRest\Api;
 
-class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
+class ObtainNonceAction implements ActionInterface, GatewayAwareInterface, \Payum\Core\ApiAwareInterface  {
     use GatewayAwareTrait;
+    use \Payum\Core\ApiAwareTrait;
 
 
     /**
@@ -27,6 +29,7 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
      */
     public function __construct(string $templateName) {
         $this->templateName = $templateName;
+        $this->apiClass = Api::class;
     }
 
     /**
@@ -41,30 +44,28 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
         if ($model['card']) {
             throw new LogicException('The token has already been set.');
         }
+        if (!$model->offsetExists('payPalOrderDetails')) {
+            $orderDetails = $this->api->placeOrder([]);
+            $model['payPalOrderDetails'] = $orderDetails;
+        }
+
         $uri = \League\Uri\Http::createFromServer($_SERVER);
 
-        $getHttpRequest = new GetHttpRequest();
-        $this->gateway->execute($getHttpRequest);
-        // Received payment intent information from Stripe
-        if (isset($getHttpRequest->request['payment_intent'])) {
-            $model['nonce'] = $getHttpRequest->request['payment_intent'];
+        $this->gateway->execute($getHttpRequest = new GetHttpRequest());
+        // Received paymentID from PayPal
+        if (isset($getHttpRequest->request['payment_id'])) {
+            $model['nonce'] = $getHttpRequest->request['payment_id'];
             return;
         }
-        $paymentIntentData = [
-            'amount' => round($model['amount'] * pow(10, $model['currencyDigits'])),
-            'shipping' => $model['shipping'],
-            'currency' => $model['currency'],
-            'metadata' => ['integration_check' => 'accept_a_payment'],
-            'statement_descriptor' => $model['statement_descriptor_suffix'],
-            'description' => $model['description'],
-        ];
 
         $this->gateway->execute($renderTemplate = new RenderTemplate($this->templateName, array(
-            'amount' => $model['currencySymbol'] . ' ' . number_format($model['amount'], $model['currencyDigits']),
+            //'amount' => $model['currencySymbol'] . ' ' . number_format($model['amount'], $model['currencyDigits']),
             'actionUrl' => $uri->withPath('')->withFragment('')->withQuery('')->__toString() . $getHttpRequest->uri,
             'imgUrl' => $model['img_url'],
             'img2Url' => $model['img_2_url'],
-            'billing' => $model['billing'] ?? [],
+            'currency' => $model['currency'],
+            'client_id' => $model['client_id'],
+            'order_id' => $model['payPalOrderDetails']['id'],
         )));
 
         throw new HttpResponse($renderTemplate->getResult());
