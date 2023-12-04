@@ -2,7 +2,7 @@
 
 {% block payum_body %}
 
-  {% block stripe_payment_form %}
+  {% block payment_form %}
   <!-- Display a payment form -->
   <form id="payment-form" method="POST" action="{{ actionUrl }}">
     <input type="hidden" name="payment_id" id="payment-id" value=""/>
@@ -19,7 +19,7 @@
   </form>
   {% endblock %}
 
-  {% block stripe_init_js %}
+  {% block init_js %}
     <script src="https://www.paypal.com/sdk/js?client-id={{ client_id }}&currency={{ currency }}"></script>
     <script type="text/javascript">
     window.paypal
