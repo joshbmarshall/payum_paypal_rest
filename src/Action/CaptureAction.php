@@ -71,7 +71,7 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface, \Payum\Co
                 }
             } else {
                 $model['status'] = 'failed';
-                $model['error'] = $captureResult;
+                $model['error'] = $captureResult['name'] . ' ' . $captureResult['message'];
             }
         }
     }
