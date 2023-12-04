@@ -62,64 +62,7 @@ class Api
 
     public function placeOrder(array $fields)
     {
-        // TODO
-        $request = '{
-            "intent": "CAPTURE",
-            "purchase_units": [
-              {
-                "reference_id": "'.uniqid('R').'",
-                "description": "Camera Shop",
-                "invoice_id": "INV-CameraShop-'.uniqid('I').'",
-                "custom_id": "CUST-CameraShop",
-                "amount": {
-                  "currency_code": "USD",
-                  "value": 350,
-                  "breakdown": {
-                    "item_total": {
-                      "currency_code": "USD",
-                      "value": 300
-                    },
-                    "shipping": {
-                      "currency_code": "USD",
-                      "value": 20
-                    },
-                    "tax_total": {
-                      "currency_code": "USD",
-                      "value": 30
-                    }
-                  }
-                },
-                "items": [
-                  {
-                    "name": "DSLR Camera",
-                    "description": "Black Camera - Digital SLR",
-                    "sku": "sku01",
-                    "unit_amount": {
-                      "currency_code": "USD",
-                      "value": 300
-                    },
-                    "quantity": "1",
-                    "category": "PHYSICAL_GOODS"
-                  }
-                ],
-                "shipping": {
-                  "address": {
-                    "address_line_1": "2211 North Street",
-                    "address_line_2": "",
-                    "admin_area_2": "San Jose",
-                    "admin_area_1": "CA",
-                    "postal_code": "95123",
-                    "country_code": "US"
-                  }
-                }
-              }
-            ],
-            "application_context": {
-              "shipping_preference": "SET_PROVIDED_ADDRESS",
-              "user_action": "PAY_NOW"
-            }
-          }';
-        return $this->doRequest('/v2/checkout/orders', json_decode($request, true));
+        return $this->doRequest('/v2/checkout/orders', $fields);
     }
 
     private function getAuthorizationBearer()
@@ -165,13 +108,6 @@ class Api
         $response = $this->client->send($request);
 
         $decoded = json_decode($response->getBody()->getContents(), true);
-        ray($decoded);
-        /*
-        if (false == ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300))
-        {
-            throw HttpException::factory($request, $response);
-        }
-        */
 
         return $decoded;
     }

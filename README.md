@@ -54,6 +54,42 @@ $payment->setCurrencyCode($currency);
 $payment->setTotalAmount(100); // Total cents
 $payment->setDescription(substr($description, 0, 45));
 $payment->setDetails([
+    // All items optional
+    'invoice_id' => 'ABC-123',
+    'shipping' => [
+        'name' => [
+            'full_name' => 'John Smith',
+        ],
+        'address' => [
+            'address_line_1' => '1 Example Street',
+            'address_line_2' => '',
+            'admin_area_2' => 'City Name',
+            'admin_area_1' => 'State Name',
+            'postal_code' => 'Postal Code',
+            'country_code' => 'Country', // e.g. US / GB / AU
+        ],
+    ],
+    // If below are given, must add up (minus discounts) to the total amount
+    'items' => [
+        [
+            'name' => 'DSLR Camera',
+            'description' => 'Black Digital SLR',
+            'sku' => 'sku01',
+            'unit_amount' => [
+                'currency_code' => 'USD',
+                'value' => 150,
+            ],
+            'quantity' => 2,
+            'category' => 'PHYSICAL_GOODS',
+        ],
+    ],
+    'item_total' => 0, // Auto-calculated if items above exist
+    'tax_total' => 0,
+    'shipping_amount' => 0,
+    'handling_amount' => 0,
+    'insurance_amount' => 0,
+    'shipping_discount_amount' => 0,
+    'discount_amount' => 0,
 ]);
 $storage->setInternalDetails($payment, $request);
 
