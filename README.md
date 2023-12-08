@@ -139,6 +139,36 @@ $gateway->execute($status = new \Cognito\PayumPayPalRest\Action\SetShippingTrack
 $success = $status['errors']
 ```
 
+### Refund part or all of a transaction
+
+```php
+<?php
+$gateway = $payum->getGateway('paypal_rest');
+
+$storage = $payum->getStorage(\Payum\Core\Model\Payment::class);
+
+// Fill in the transaction, currency and amount.
+// Leave the amount blank or 0 to refund the whole transaction
+$payment = $storage->create();
+$payment->setNumber($transaction_id);
+$payment->setCurrencyCode($currency_code);
+$payment->setTotalAmount($amount);
+
+$storage->update($payment);
+$refundToken = $payum->getTokenFactory()->createRefundToken($this->processor, $payment, 'done');
+
+$gateway->execute(new \Payum\Core\Request\Refund($refundToken));
+$gateway->execute($status = new \Payum\Core\Request\GetHumanStatus($refundToken));
+if ($status->isRefunded())
+{
+    return $status->getModel()['id'];
+}
+else
+{
+    throw new \Exception(json_encode($payment->getDetails()));
+}
+```
+
 ## License
 
 Payum PayPal Rest is released under the [MIT License](LICENSE).

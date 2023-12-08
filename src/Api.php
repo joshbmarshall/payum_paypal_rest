@@ -39,6 +39,19 @@ class Api
         $this->messageFactory = $messageFactory;
     }
 
+    public function refund(string $transaction_id, $amount = null, $currency_code = '')
+    {
+        $request = [];
+        if ($amount)
+        {
+            $request['amount'] = [
+                'value' => $amount,
+                'currency_code' => $currency_code,
+            ];
+        }
+        return array_merge(['isRefund' => true], $this->doRequest('/v2/payments/captures/' . $transaction_id . '/refund', $request));
+    }
+
     public function setShippingTracking(array $fields)
     {
         /*

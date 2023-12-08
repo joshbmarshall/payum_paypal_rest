@@ -1,4 +1,5 @@
 <?php
+
 namespace Cognito\PayumPayPalRest\Action;
 
 use Payum\Core\Action\ActionInterface;
@@ -19,19 +20,28 @@ class StatusAction implements ActionInterface
 
         $model = ArrayObject::ensureArrayObject($request->getModel());
 
-        if ($model['error']) {
+        if ($model['error'])
+        {
             $request->markFailed();
 
             return;
         }
 
-        if (false == $model['status'] && false == $model['nonce']) {
+        if (false == $model['status'] && false == $model['nonce'])
+        {
             $request->markNew();
 
             return;
         }
-        if ('success' == $model['status']) {
+        if ('success' == $model['status'])
+        {
             $request->markCaptured();
+
+            return;
+        }
+        if ('COMPLETED' == $model['status'] && $model['isRefund'])
+        {
+            $request->markRefunded();
 
             return;
         }
@@ -45,7 +55,6 @@ class StatusAction implements ActionInterface
     {
         return
             $request instanceof GetStatusInterface &&
-            $request->getModel() instanceof \ArrayAccess
-        ;
+            $request->getModel() instanceof \ArrayAccess;
     }
 }

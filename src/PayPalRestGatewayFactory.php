@@ -6,6 +6,7 @@ use Cognito\PayumPayPalRest\Action\CaptureAction;
 use Cognito\PayumPayPalRest\Action\ObtainNonceAction;
 use Cognito\PayumPayPalRest\Action\StatusAction;
 use Cognito\PayumPayPalRest\Action\SetShippingTrackingAction;
+use Cognito\PayumPayPalRest\Action\RefundAction;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\GatewayFactory;
 
@@ -33,6 +34,7 @@ class PayPalRestGatewayFactory extends GatewayFactory
             'payum.action.set_shipping_tracking' => function (ArrayObject $config) {
                 return new SetShippingTrackingAction($config);
             },
+            'payum.action.refund' => new RefundAction(),
         ]);
 
         if (false == $config['payum.api']) {
