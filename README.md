@@ -1,12 +1,12 @@
-# Laybuy Payment Module
+# PayPal REST Payment Module
 
-The Payum extension to purchase through Laybuy
+The Payum extension to purchase through PayPal using their REST interface
 
 ## Install and Use
 
 To install, it's easiest to use composer:
 
-    composer require cognito/payum_laybuy
+    composer require cognito/payum_paypal_rest
 
 ### Build the config
 
@@ -19,12 +19,12 @@ use Payum\Core\GatewayFactoryInterface;
 $defaultConfig = [];
 
 $payum = (new PayumBuilder)
-    ->addGatewayFactory('laybuy', function(array $config, GatewayFactoryInterface $coreGatewayFactory) {
-        return new \Cognito\PayumLaybuy\LaybuyGatewayFactory($config, $coreGatewayFactory);
+    ->addGatewayFactory('paypal_rest', function(array $config, GatewayFactoryInterface $coreGatewayFactory) {
+        return new \Cognito\PayumPayPalRest\PayPalRestGatewayFactory($config, $coreGatewayFactory);
     })
 
-    ->addGateway('laybuy', [
-        'factory' => 'laybuy',
+    ->addGateway('paypal_rest', [
+        'factory' => 'paypal_rest',
         'merchantId' => 'Your merchant Id',
         'authenticationKey' => 'Your Authentication Key',
         'sandbox' => true,
@@ -93,7 +93,7 @@ $payment->setDetails([
 ]);
 $storage->setInternalDetails($payment, $request);
 
-$captureToken = $payum->getTokenFactory()->createCaptureToken('laybuy', $payment, 'done.php');
+$captureToken = $payum->getTokenFactory()->createCaptureToken('paypal_rest', $payment, 'done.php');
 $url = $captureToken->getTargetUrl();
 header("Location: " . $url);
 die();
@@ -116,14 +116,14 @@ $gateway->execute($status = new GetHumanStatus($model));
 
 // using shortcut
 if ($status->isNew() || $status->isCaptured() || $status->isAuthorized()) {
-	// success
+    // success
 } elseif ($status->isPending()) {
-	// most likely success, but you have to wait for a push notification.
+    // most likely success, but you have to wait for a push notification.
 } elseif ($status->isFailed() || $status->isCanceled()) {
-	// the payment has failed or user canceled it.
+    // the payment has failed or user canceled it.
 }
 ```
 
 ## License
 
-Payum Laybuy is released under the [MIT License](LICENSE).
+Payum PayPal Rest is released under the [MIT License](LICENSE).
