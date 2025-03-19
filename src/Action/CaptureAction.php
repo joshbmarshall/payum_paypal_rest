@@ -121,8 +121,9 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
                 'paypal' => [
                     'payment_method_preference' => 'IMMEDIATE_PAYMENT_REQUIRED',
                     'experience_context'        => [
-                        'return_url' => $request->getToken()->getTargetUrl(),
-                        'cancel_url' => $request->getToken()->getAfterUrl(),
+                        'user_action' => 'PAY_NOW',
+                        'return_url'  => $request->getToken()->getTargetUrl(),
+                        'cancel_url'  => $request->getToken()->getAfterUrl(),
                     ],
                 ],
             ],
