@@ -129,7 +129,8 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
             ],
             'purchase_units' => [
                 [
-                    'amount' => [
+                    'reference_id' => $payment_id,
+                    'amount'       => [
                         'currency_code' => $model['currency'],
                         'value'         => $model['amount'],
                     ],
