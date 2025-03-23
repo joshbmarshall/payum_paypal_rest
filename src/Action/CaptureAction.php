@@ -95,7 +95,37 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
                 }
             }
         }
-
+        $order_total = 0;
+        foreach ($model['order']['items'] as $item) {
+            $purchase_unit['items'][] = [
+                'name'        => $item['name'],
+                'quantity'    => $item['quantity'],
+                'unit_amount' => [
+                    'currency_code' => $model['currency'],
+                    'value'         => $item['amount'],
+                ],
+            ];
+            $order_total += $item['amount'];
+        }
+        $order_total       = round($order_total, 2);
+        $adjustment_amount = round($model['amount'] - $order_total, 2);
+        if ($adjustment_amount) {
+            // Create a discount / surcharge line
+            $purchase_unit['items'][] = [
+                'name'        => 'Adjustment',
+                'quantity'    => 1,
+                'unit_amount' => [
+                    'currency_code' => $model['currency'],
+                    'value'         => $adjustment_amount,
+                ],
+            ];
+        }
+        $purchase_unit['amount']['breakdown'] = [
+            'item_total' => [
+                'currency_code' => $model['currency'],
+                'value'         => $order_total + $adjustment_amount,
+            ],
+        ];
         $data = [
             'intent'         => 'CAPTURE',
             'payment_source' => [
