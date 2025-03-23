@@ -66,55 +66,6 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
         }
         $payment_id = $model['merchant_reference'];
 
-        $data = [
-            'amount'            => $model['amount'],
-            'currency'          => $model['currency'],
-            'returnUrl'         => $request->getToken()->getTargetUrl(),
-            'merchantReference' => $payment_id,
-            'customer'          => [
-                'firstName' => $model['shopper']['first_name'],
-                'lastName'  => $model['shopper']['last_name'],
-                'email'     => $model['shopper']['email'],
-                'phone'     => $model['shopper']['phone'],
-            ],
-            'billingAddress' => [
-                'address1' => trim($model['shopper']['billing_address']['line1'] . ' ' . $model['shopper']['billing_address']['line2']),
-                'city'     => $model['shopper']['billing_address']['city'],
-                'postcode' => $model['shopper']['billing_address']['postal_code'],
-                'country'  => $model['shopper']['billing_address']['country'],
-            ],
-            'shippingAddress' => [
-                'address1' => trim($model['order']['shipping']['address']['line1'] . ' ' . $model['order']['shipping']['address']['line2']),
-                'city'     => $model['order']['shipping']['address']['city'],
-                'postcode' => $model['order']['shipping']['address']['postal_code'],
-                'country'  => $model['order']['shipping']['address']['country'],
-            ],
-            'items' => [],
-        ];
-        $itemcnt     = 0;
-        $order_total = 0;
-        foreach ($model['order']['items'] as $item) {
-            $itemcnt++;
-            $data['items'][] = [
-                'id'          => $payment_id . '-' . $itemcnt,
-                'description' => $item['name'],
-                'quantity'    => $item['quantity'],
-                'price'       => $item['amount'],
-            ];
-            $order_total += $item['amount'];
-        }
-        $order_total = round($order_total, 2);
-        if ($order_total != $model['amount']) {
-            // Create a discount / surcharge line
-            $itemcnt++;
-            $data['items'][] = [
-                'id'          => $payment_id . '-' . $itemcnt,
-                'description' => 'Adjustment',
-                'quantity'    => 1,
-                'price'       => round($model['amount'] - $order_total, 2),
-            ];
-        }
-
         $purchase_unit = [
             'reference_id' => $payment_id,
             'amount'       => [
@@ -144,6 +95,7 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
                 }
             }
         }
+
         $data = [
             'intent'         => 'CAPTURE',
             'payment_source' => [
@@ -182,7 +134,6 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
                 ];
             }
         }
-        ray($data);
         $returned_data = $this->doPostRequest('/v2/checkout/orders', $data);
 
         if ($returned_data['status'] != 'PAYER_ACTION_REQUIRED') {
