@@ -161,6 +161,28 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
                 $purchase_unit,
             ],
         ];
+        if ($model['shopper'] ?? false) {
+            if ($model['shopper']['email'] ?? false) {
+                $data['payment_source']['paypal']['email_address'] = $model['shopper']['email'];
+            }
+            if ($model['shopper']['first_name'] ?? false) {
+                $data['payment_source']['paypal']['name'] = [
+                    'given_name' => $model['shopper']['first_name'],
+                    'surname'    => $model['shopper']['last_name'],
+                ];
+            }
+            if ($model['shopper']['billing_address']['city'] ?? false) {
+                $data['payment_source']['paypal']['address'] = [
+                    'address_line_1' => $model['shopper']['billing_address']['line1'],
+                    'address_line_2' => $model['shopper']['billing_address']['line2'],
+                    'admin_area_2'   => $model['shopper']['billing_address']['city'],
+                    'admin_area_1'   => $model['shopper']['billing_address']['state'],
+                    'postal_code'    => $model['shopper']['billing_address']['postal_code'],
+                    'country_code'   => $model['shopper']['billing_address']['country'],
+                ];
+            }
+        }
+        ray($data);
         $returned_data = $this->doPostRequest('/v2/checkout/orders', $data);
 
         if ($returned_data['status'] != 'PAYER_ACTION_REQUIRED') {
