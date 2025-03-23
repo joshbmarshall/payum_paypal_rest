@@ -115,29 +115,52 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
             ];
         }
 
+        $purchase_unit = [
+            'reference_id' => $payment_id,
+            'amount'       => [
+                'currency_code' => $model['currency'],
+                'value'         => $model['amount'],
+            ],
+        ];
+
+        $shipping_preference = 'SET_PROVIDED_ADDRESS';
+
+        if ($model['order'] ?? false) {
+            if ($model['order']['shipping'] ?? false) {
+                $purchase_unit['shipping'] = [];
+                if ($model['order']['shipping']['address']['city'] ?? false) {
+                    $purchase_unit['shipping']['address'] = [
+                        'address_line_1' => $model['order']['shipping']['address']['line1'],
+                        'address_line_2' => $model['order']['shipping']['address']['line2'],
+                        'admin_area_2'   => $model['order']['shipping']['address']['city'],
+                        'admin_area_1'   => $model['order']['shipping']['address']['state'],
+                        'postal_code'    => $model['order']['shipping']['address']['postal_code'],
+                        'country_code'   => $model['order']['shipping']['address']['country'],
+                    ];
+                }
+                if ($model['order']['shipping']['pickup'] ?? false) {
+                    $purchase_unit['shipping']['type'] = 'PICKUP_IN_STORE';
+                    $shipping_preference               = 'NO_SHIPPING';
+                }
+            }
+        }
         $data = [
             'intent'         => 'CAPTURE',
             'payment_source' => [
                 'paypal' => [
                     'payment_method_preference' => 'IMMEDIATE_PAYMENT_REQUIRED',
                     'experience_context'        => [
-                        'user_action' => 'PAY_NOW',
-                        'return_url'  => $request->getToken()->getTargetUrl(),
-                        'cancel_url'  => $request->getToken()->getAfterUrl(),
+                        'user_action'         => 'PAY_NOW',
+                        'shipping_preference' => $shipping_preference,
+                        'return_url'          => $request->getToken()->getTargetUrl(),
+                        'cancel_url'          => $request->getToken()->getAfterUrl(),
                     ],
                 ],
             ],
             'purchase_units' => [
-                [
-                    'reference_id' => $payment_id,
-                    'amount'       => [
-                        'currency_code' => $model['currency'],
-                        'value'         => $model['amount'],
-                    ],
-                ],
+                $purchase_unit,
             ],
         ];
-
         $returned_data = $this->doPostRequest('/v2/checkout/orders', $data);
 
         if ($returned_data['status'] != 'PAYER_ACTION_REQUIRED') {
