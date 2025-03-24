@@ -94,10 +94,10 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
                     $purchase_unit['shipping']['type'] = 'PICKUP_IN_STORE';
                     $shipping_preference               = 'NO_SHIPPING';
                 }
+                if (!$purchase_unit['shipping']) {
+                    unset($purchase_unit['shipping']);
+                }
             }
-        }
-        if (!$purchase_unit['shipping']) {
-            unset($purchase_unit['shipping']);
         }
         $order_total = 0;
         foreach ($model['order']['items'] as $item) {
@@ -109,7 +109,7 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
                     'value'         => $item['amount'],
                 ],
             ];
-            $order_total += $item['amount'];
+            $order_total += $item['amount'] * $item['quantity'];
         }
         $order_total       = round($order_total, 2);
         $adjustment_amount = round($model['amount'] - $order_total, 2);
