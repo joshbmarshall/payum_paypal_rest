@@ -74,7 +74,7 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
             ],
         ];
 
-        $shipping_preference = 'SET_PROVIDED_ADDRESS';
+        $shipping_preference = 'NO_SHIPPING';
 
         if ($model['order'] ?? false) {
             if ($model['order']['shipping'] ?? false) {
@@ -88,12 +88,16 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
                         'postal_code'    => $model['order']['shipping']['address']['postal_code'],
                         'country_code'   => $model['order']['shipping']['address']['country'],
                     ];
+                    $shipping_preference = 'SET_PROVIDED_ADDRESS';
                 }
                 if ($model['order']['shipping']['pickup'] ?? false) {
                     $purchase_unit['shipping']['type'] = 'PICKUP_IN_STORE';
                     $shipping_preference               = 'NO_SHIPPING';
                 }
             }
+        }
+        if (!$purchase_unit['shipping']) {
+            unset($purchase_unit['shipping']);
         }
         $order_total = 0;
         foreach ($model['order']['items'] as $item) {
