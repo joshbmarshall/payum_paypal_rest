@@ -113,8 +113,8 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
         }
         $order_total       = round($order_total, 2);
         $adjustment_amount = round($model['amount'] - $order_total, 2);
-        if ($adjustment_amount) {
-            // Create a discount / surcharge line
+        if ($adjustment_amount > 0) {
+            // Create a surcharge line
             $purchase_unit['items'][] = [
                 'name'        => 'Adjustment',
                 'quantity'    => 1,
@@ -123,11 +123,12 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
                     'value'         => $adjustment_amount,
                 ],
             ];
+            $order_total = round($order_total + $adjustment_amount, 2);
         }
         $purchase_unit['amount']['breakdown'] = [
             'item_total' => [
                 'currency_code' => $model['currency'],
-                'value'         => $order_total + $adjustment_amount,
+                'value'         => $order_total,
             ],
         ];
         $data = [
