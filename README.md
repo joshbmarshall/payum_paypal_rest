@@ -8,6 +8,16 @@ To install, it's easiest to use composer:
 
     composer require cognito/payum_paypal_rest
 
+### Getting the credentials
+
+According to the [PayPal Developer Documentation](https://developer.paypal.com/api/rest/)
+here's how to get your client ID and client secret:
+
+* Select [Log in to Dashboard](https://developer.paypal.com/dashboard/) and log in or sign up.
+* Select Apps & Credentials.
+* New accounts come with a Default Application in the REST API apps section. To create a new project, select Create App.
+* Copy the client ID and client secret for your app.
+
 ### Build the config
 
 ```php
@@ -25,8 +35,8 @@ $payum = (new PayumBuilder)
 
     ->addGateway('paypal_rest', [
         'factory' => 'paypal_rest',
-        'merchantId' => 'Your merchant Id',
-        'authenticationKey' => 'Your Authentication Key',
+        'client_id'     => 'Your Client ID',
+        'client_secret' => 'Your Client Secret',
         'sandbox' => true,
     ])
 
@@ -71,11 +81,13 @@ $payment->setDetails([
     'order' => [
         'shipping' => [
             'address' => [
-            'line1' => '',
-            'line2' => '',
-            'city' => '',
-            'postal_code' => '',
-            'country' => '',
+                'line1' => '',
+                'line2' => '',
+                'city' => '',
+                'postal_code' => '',
+                'country' => '',
+            ],
+            'pickup' => false, // Set true for Click and Collect
         ],
         'items' => [
             [
