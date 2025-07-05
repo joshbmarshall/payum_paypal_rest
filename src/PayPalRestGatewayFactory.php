@@ -16,8 +16,8 @@ class PayPalRestGatewayFactory extends GatewayFactory
     protected function populateConfig(ArrayObject $config)
     {
         $config->defaults([
-            'payum.factory_name'  => 'paypal_rest',
-            'payum.factory_title' => 'paypal_rest',
+            'payum.factory_name'  => 'cognito_paypal_rest',
+            'payum.factory_title' => 'PayPal',
 
             'payum.action.capture' => function (ArrayObject $config) {
                 return new CaptureAction($config);
