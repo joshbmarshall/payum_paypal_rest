@@ -29,12 +29,12 @@ use Payum\Core\GatewayFactoryInterface;
 $defaultConfig = [];
 
 $payum = (new PayumBuilder)
-    ->addGatewayFactory('cognito_paypal_rest', function(array $config, GatewayFactoryInterface $coreGatewayFactory) {
+    ->addGatewayFactory('paypal_rest', function(array $config, GatewayFactoryInterface $coreGatewayFactory) {
         return new \Cognito\PayumPayPalRest\PayPalRestGatewayFactory($config, $coreGatewayFactory);
     })
 
-    ->addGateway('cognito_paypal_rest', [
-        'factory' => 'cognito_paypal_rest',
+    ->addGateway('paypal_rest', [
+        'factory' => 'paypal_rest',
         'client_id'     => 'Your Client ID',
         'client_secret' => 'Your Client Secret',
         'sandbox' => true,
@@ -105,7 +105,7 @@ $payment->setDetails([
 ]);
 $storage->setInternalDetails($payment, $request);
 
-$captureToken = $payum->getTokenFactory()->createCaptureToken('cognito_paypal_rest', $payment, 'done.php');
+$captureToken = $payum->getTokenFactory()->createCaptureToken('paypal_rest', $payment, 'done.php');
 $url = $captureToken->getTargetUrl();
 header("Location: " . $url);
 die();
