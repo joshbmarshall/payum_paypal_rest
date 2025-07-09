@@ -56,6 +56,13 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
                 $model['status']               = 'success';
                 $model['transactionReference'] = $result['id'];
                 $model['result']               = 'success';
+                $fee = 0;
+                foreach ($result['purchase_units'] as $purchase_unit) {
+                    foreach ($purchase_unit['payments']['captures'] as $capture) {
+                        $fee += $capture['seller_receivable_breakdown']['paypal_fee']['value'];
+                    }
+                }
+                $model['transactionFee'] = $fee;
 
                 return;
             }
